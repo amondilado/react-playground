@@ -22,7 +22,7 @@ class ProductCategoryRow extends Component {
         const category = this.props.category;
         return(
             <tr>
-                <th colspan="3">{category}</th>
+                <th colSpan="3">{category}</th>
             </tr>
         );
     }
@@ -92,11 +92,14 @@ class SearchBar extends Component {
             <fieldset>
                 <legend>Filter products</legend>
                 <div className="form-group">
-                    <label>Search</label>
-                    <input type="search" value={this.props.filterText} onChange={this.handleFilterTextChange} className="form-control" placeholder="product name..."/>
+                    <label htmlFor="productSearch">Search</label>
+                    <input type="search" value={this.props.filterText} onChange={this.handleFilterTextChange} id="productSearch" className="form-control" name="search" placeholder="product name..."/>
                 </div>
-                <input type="checkbox" checked={this.props.isStockedOnly} onChange={this.handleInStockChange} name="isStockedOnly" />
-                <label>Show only stocked products</label>
+                
+                <label>
+                    <input type="checkbox" checked={this.props.isStockedOnly} onChange={this.handleInStockChange} name="isStockedOnly" />
+                    Show only stocked products
+                </label>
             </fieldset>
         );
     }

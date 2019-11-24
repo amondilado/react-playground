@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from "react-dom";
-import { GameTicTacToe, Calculator, Dialog, SignUpDialog, FilterableProductTable } from "./lib";
+import { GameTicTacToe, Calculator, Dialog, SignUpDialog, FilterableProductTable, MemberSignUpForm, OuterClickExample } from "./lib";
 import "./assets/styles/GlobalStyles.css"
 
 const PRODUCTS = [
@@ -22,6 +22,8 @@ const App = () => (
     <Dialog title="Dialog title" message="Dialog description" color="primary" left="left" right="right" splitClass="flex primary" />
     <SignUpDialog title="Mars Exploration Program" message="How should we refer to you?"/>
     <FilterableProductTable products={PRODUCTS}/>
+    <MemberSignUpForm />
+    <OuterClickExample />
   </div>
 );
 

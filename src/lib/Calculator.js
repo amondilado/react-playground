@@ -42,12 +42,10 @@ class TemperatureInput extends Component {
           scale = this.props.scale;
 
     return (
-      <section>
-        <fieldset>
-          <legend>Enter temperature in {scaleNames[scale]}:</legend>
-          <input type="text" value={temperature} onChange={this.handleChange} />
-        </fieldset>
-      </section>
+      <fieldset>
+        <legend>Enter temperature in {scaleNames[scale]}:</legend>
+        <input type="text" value={temperature} onChange={this.handleChange} name="calculator.temperature" placeholder="type temperature degrees..." />
+      </fieldset>
     );
   }
 }
