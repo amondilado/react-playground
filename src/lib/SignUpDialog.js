@@ -25,6 +25,6 @@ class SignUpDialog extends React.Component {
             </Dialog>
         );
     }
-};
+}
 
 export default SignUpDialog;

@@ -162,6 +162,6 @@ class GameTicTacToe extends Component {
     return (
       <Game />
     );}
-};
+}
 
 export default GameTicTacToe;

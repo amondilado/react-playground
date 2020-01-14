@@ -4,7 +4,6 @@ function CustomInput(props) {
     return(
         <div className="form-group">
             <label htmlFor={props.id}>{props.label}</label>
-            {/* ref={this.textInput} */}
             <input ref={props.inputRef} type={props.inputType} id={props.id} name={props.inputName} required={props.inputRequired} placeholder={props.inputPlaceholder} className="form-control" />
         </div>
     );
@@ -14,20 +13,25 @@ class MemberSignUpForm extends Component {
     constructor(props) {
         super(props);
         this.inputUsername = React.createRef();
+        this.inputPassword = React.createRef();
         this.setFocus = this.setFocus.bind(this);
     }
 
-    setFocus(elem) {
-        elem.current.focus();
+    setFocus() {
+        if(this.inputUsername.current.value === "") {
+            this.inputUsername.current.focus();
+
+        } else if(this.inputPassword.current.value === "") {
+            this.inputPassword.current.focus();
+        }
     }
 
     render() {
         return(
             <form>
                 <CustomInput inputRef={this.inputUsername} id="userName" label="Username" inputPlaceholder="e.g. sam" inputType="text" inputName="username" />
-                {/* TODO inputRef */}
-                <CustomInput id="userPassword" label="Password" inputRef={this.inputElement} inputPlaceholder="type a secure password..." inputType="password" inputName="password" inputRequired="required" />
-                <button type="button" onClick={(e) => this.setFocus(this.inputUsername)} className="btn">Set focus</button>
+                <CustomInput id="userPassword" label="Password" inputRef={this.inputPassword} inputPlaceholder="type a secure password..." inputType="password" inputName="password" inputRequired="required" />
+                <button type="button" onClick={this.setFocus} className="btn">Set focus</button>
             </form>
         );
     }
