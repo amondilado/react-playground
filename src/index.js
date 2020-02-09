@@ -2,8 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import Datepicker from "./components/datepicker/datepicker.component";
 import * as serviceWorker from './serviceWorker';
 
+ReactDOM.render(<Datepicker />, document.getElementById('pr_DP'));
 ReactDOM.render(<App />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change

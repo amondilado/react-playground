@@ -1,0 +1,42 @@
+html {
+    --datepicker-buttons-color: #000;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    background-color: #f2f2f2;
+    margin: 0 auto;
+    width: 96vw;
+    max-width: 800px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+button {
+    border: 1px solid currentColor;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: .75em;
+}
+.datepicker-component {
+    position: relative;
+    z-index: 10;
+}
+.datepicker-button, .time-control {
+    font-size: 1rem;
+    font-weight: bold;
+}
+.datepicker-button, .time-control-group {
+    background-color: #fff;
+    border-color: currentColor;
+    border-style: solid;
+    border-width: 0 0 2px 0;
+    padding: .75em;
+}
+.datepicker-button {
+    cursor: pointer;
+}
