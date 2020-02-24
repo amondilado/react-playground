@@ -14,7 +14,6 @@ export const utils_extend = function (defaults, options) {
             extended[prop] = options[prop];
         }
     }
-    console.log('_o: ',extended);
     return extended;
 };
 

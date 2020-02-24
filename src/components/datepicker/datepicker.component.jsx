@@ -1,7 +1,7 @@
 import React from "react";
 // import TimePicker from "../time-picker/time-picker.component";
 import DatePicker from "react-datepicker";
-import {addDays, isBefore, isAfter, addHours, addMinutes} from "date-fns";
+import {addDays, isAfter, addHours, setHours, setMinutes} from "date-fns";
 import {utils_extend} from '../../utils/utils';
 import "react-datepicker/dist/react-datepicker.css";
 import "./datepicker.styles.scss";
@@ -10,7 +10,6 @@ import "./datepicker.styles.scss";
 // . Props drilling
 // . Remove time picker component
 // . Set initial time base on set interval
-// . Add useState
 // . Disable time options
 // . Disable past time options: excludeTimes
 
@@ -21,7 +20,7 @@ import "./datepicker.styles.scss";
 
 const APP_SETTINGS = window['APP_SETTINGS'] || {};
 const APP_VERBALS = window['APP_VERBALS'] || {};
-const currentDate = new Date();
+const currentDate = new Date('2020-02-24T19:50'); // TODO
 
 const DateCustomInput = React.forwardRef((props, ref) => (
     <button className="datepicker-button" ref={ref} type="button" onClick={props.onClick}>
@@ -33,10 +32,10 @@ const DateCustomInput = React.forwardRef((props, ref) => (
 class Datepicker extends React.Component {
     _defaults = {
         dateFormat: 'MM/dd/yyyy',
-        displayFormat: {"day": "D", "top": "MMM", "bottom": "YYYY"},
+        // displayFormat: {"day": "D", "top": "MMM", "bottom": "YYYY"},
         locale: 'en',
         dateStart: currentDate,
-        dateEnd: currentDate,
+        dateEnd: addDays(currentDate, 1),
         minDate: currentDate,
         dateMax: '',
         durationMin: 0,
@@ -61,50 +60,92 @@ class Datepicker extends React.Component {
         timeEnd: this._o['timeEnd']
     };
 
-    // initStartDate = () => {};
-    getClosestInterval = (d, i) => {
+    getClosestInterval = (date, interval) => {
         // Safari issue: new Date(defaults.timezone) >> Invalid date
-        const rm = (Math.ceil(d.getMinutes() / i) * i) % 60;
+        const rm = (Math.ceil(date.getMinutes() / interval) * interval) % 60;
 
-        console.log('___GET_ClosestInterval: ', d,' rm:',rm);
-        return (rm === 0) ? 0 : rm; // String coercion
+        console.log('___GET_ClosestInterval: ', date,' rm:',rm);
+        return rm === 0 ? 0 : rm;
     };
+
+    getTimeInterval = d => {
+        const _d = d,//new Date('2020-02-24T16:50:09'),
+              _minutesToAdd = this.getClosestInterval(_d, this._o['timeIntervals']);
+
+        console.log('___GET_TimeInterval _minutesToAdd:', _minutesToAdd,'\n d:',_d);
+
+        _d.setMinutes(_minutesToAdd);
+        return _minutesToAdd ? _d : addHours(_d,1);
+    };
+
     updateDateEnd = (ds, de) => {
-        if (isBefore(ds, de)) {
-            return;
-        }
-        this.setState({
-            endDate: addDays(ds, 1)
-        });
-    };
-
-    checkDates = () => {
-        let {minDate, startDate, endDate} = this.state;
-
-        console.log('startDate 1:', startDate);
-
-        const interval = this.getClosestInterval(startDate, this._o['timeIntervals']);
-        const minutesToAdd = interval - currentDate.getMinutes();
-
-        if(minutesToAdd > 0) {
-            startDate = addMinutes(startDate, minutesToAdd);
-        } else {
-            startDate = startDate.setMinutes(0);
-            startDate = addHours(startDate, 1);
-        }
-
-        this.setState({startDate: startDate});
-
-        console.log('startDate 2:', startDate);
-
-        if (isAfter(minDate, startDate)) {
-            startDate = minDate; // TODO check minDate Interval
-            console.log('minDate:', minDate);
+        console.log('___updateDateEnd ds, de: ',ds, de);
+        if (isAfter(ds.getDay(), de)) {
             this.setState({
-                startDate: startDate
+                endDate: addDays(ds, 1)
             });
         }
-        this.updateDateEnd(startDate, endDate);
+    };
+
+    calcExcludedTimes = (date, interval) => {
+        const _array = [],
+              intervals = [0,15,30,45], // TODO
+              minutes = date.getMinutes(),
+              selectedTimeSlot = minutes ? intervals.indexOf(minutes) - 1 : 0;
+
+        date.setSeconds(0);
+
+        for(var i = 0; i < date.getHours(); i++) {
+            for(var j = 0, l = intervals.length; j < l; j++) {
+                if(l === j && selectedTimeSlot === intervals[j]) {
+                    break;
+                }
+                _array.push(setHours(setMinutes(date, intervals[j]), i));
+            }
+        }
+        return _array;
+    };
+
+    initDates = () => {
+        const {minDate, startDate, endDate, timeStart, timeEnd} = this.state;
+        const _o = this._o;
+
+        let _min,
+            _start = startDate,
+            _end = endDate,
+            _ts = timeStart.split(':'),
+            _te = timeEnd.split(':'),
+            _tmin = currentDate.getHours() + _o.timeMin;
+
+        console.log('\n_tmin: ',_tmin);
+
+        _min = this.getTimeInterval(minDate);
+
+        if(24 < _tmin) {
+            addDays(_min, 1);
+            _tmin = _tmin - 24;
+        }
+
+        _min.setHours(_tmin);
+        console.log('_min: ',_min, '\n_tmin: ',_tmin);
+
+        _start.setHours(_ts[0] ,_ts[1]);
+        _end.setHours(_te[0],_te[1]);
+        console.log('_start: ',_start, '_end: ',_end);
+
+        if (isAfter(_min, _start)) {
+            _start = _min;
+            console.log('\nNew d: ',_start);
+        }
+
+        this.setState({minDate: _min});
+        this.setState({startDate: _start});
+        // TODO Review
+        this.setState({endDate: _end});
+        this.updateDateEnd(_start, _end);
+
+        // TODO excludeTimes
+        _o.timeStartExcluded = this.calcExcludedTimes(_start, _o.timeIntervals);
     };
 
     handleDateStartChange = date => {
@@ -124,24 +165,17 @@ class Datepicker extends React.Component {
         console.log('handleDateEndChange', date)
     };
 
-    handleTimeStartChange = (e) => {
-        console.log('handleTimeStartChange selectedIndex: ', e.target.selectedIndex);
-        this.setState({
-            timeStart: e.target.selectedIndex
-        });
-    };
-
-    handleTimeEndChange = (e) => {
-        console.log('handleTimeEndChange selectedIndex: ', e.target.selectedIndex);
-        this.setState({
-            timeEnd: e.target.selectedIndex
-        });
-    };
-
-    handleTime = (date) => {
-        console.log('handleTime date: ', date);
+    handleTimeStartChange = date => {
+        console.log('handleTimeStartChange selectedIndex: ', date);
         this.setState({
             startDate: date
+        });
+    };
+
+    handleTimeEndChange = date => {
+        console.log('handleTimeEndChange selectedIndex: ', date);
+        this.setState({
+            endDate: date
         });
     };
 
@@ -149,17 +183,16 @@ class Datepicker extends React.Component {
         const {minDate, startDate, endDate} = this.state;
         // Normalize data
         // 1. Time
-        // TODO set intervals
-        console.log('');
+        console.log('componentWillMount');
         // 2. Date
-        this.checkDates();
+        this.initDates();
 
     }
 
     render() {
-        const {minDate, startDate, endDate} = this.state;
-        const {dateFormat, timeIntervals} = this._o;
         const ref = React.createRef();
+        const {minDate, startDate, endDate} = this.state;
+        const {dateFormat, timeIntervals, timeStartExcluded} = this._o;
 
         console.log('>>> startDate', startDate);
 
@@ -180,14 +213,16 @@ class Datepicker extends React.Component {
                     />
                     <DatePicker
                         selected={startDate}
-                        onChange={this.handleTime}
+                        onChange={this.handleTimeStartChange}
                         showTimeSelect
                         showTimeSelectOnly
                         timeIntervals={timeIntervals}
                         timeCaption={APP_VERBALS.timeCaption}
+                        excludeTimes={timeStartExcluded}
                         dateFormat="HH:mm"
                     />
                 </div>
+
                 <div className="datepicker-col">
                     <DatePicker dateFormat={APP_SETTINGS.dateFormat}
                                 ref={ref}
@@ -198,6 +233,15 @@ class Datepicker extends React.Component {
                                 endDate={endDate}
                                 minDate={startDate}
                                 customInput={<DateCustomInput ref={ref}/>}
+                    />
+                    <DatePicker
+                        selected={endDate}
+                        onChange={this.handleTimeEndChange}
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={timeIntervals}
+                        timeCaption={APP_VERBALS.timeCaption}
+                        dateFormat="HH:mm"
                     />
                 </div>
 
